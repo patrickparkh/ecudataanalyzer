@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>사용법 — 시험 데이터 비교 보고서</title>
+<!-- seo-kit: 검색 · 공유 미리보기(주소를 옮기면 이 묶음의 주소를 내 주소로) -->
+<link rel="canonical" href="https://build-2611-05.jobability.co.kr/guide.html">
+<meta name="robots" content="index,follow">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="HD건설기계">
+<meta property="og:title" content="사용법 — 시험 데이터 비교 보고서">
+<meta property="og:description" content="차량 시험 raw data(CSV·엑셀)를 올리면 조건 구간(예: 차속 0→30 km/h 가속)의 가속 시간·평균 부하율·연비를 한 번에 계산하고, 레퍼런스와 페달·부하율·회전수 패턴이 닮은 구간을 찾아 유사성 지표로 비교한 뒤, 사용자가 유사 여부를 확인하면 그래프가 들어간 보고서(인">
+<meta property="og:url" content="https://build-2611-05.jobability.co.kr/guide.html">
+<meta property="og:image" content="https://build-2611-05.jobability.co.kr/og-image.png?v=2">
+<meta property="og:image:secure_url" content="https://build-2611-05.jobability.co.kr/og-image.png?v=2">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="ECU Data Analyzer">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="사용법 — 시험 데이터 비교 보고서">
+<meta name="twitter:description" content="차량 시험 raw data(CSV·엑셀)를 올리면 조건 구간(예: 차속 0→30 km/h 가속)의 가속 시간·평균 부하율·연비를 한 번에 계산하고, 레퍼런스와 페달·부하율·회전수 패턴이 닮은 구간을 찾아 유사성 지표로 비교한 뒤, 사용자가 유사 여부를 확인하면 그래프가 들어간 보고서(인">
+<meta name="twitter:image" content="https://build-2611-05.jobability.co.kr/og-image.png?v=2">
+<!-- /seo-kit -->
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<nav class="topnav" aria-label="주요 메뉴">
+  <div class="topnav-inner">
+    <a class="topnav-brand" href="index.html">시험 데이터 비교 보고서 <small>build-2611-05 · 기획 Hyunwoo Park</small></a>
+    <ul class="topnav-links">
+      <li><a href="index.html">도구</a></li>
+      <li><a href="guide.html" class="active" aria-current="page">사용법</a></li>
+      <li><a href="plan.html">기획서</a></li>
+    </ul>
+  </div>
+</nav>
+<header class="hero"><div class="wrap">
+  <div class="eyebrow">사용법</div>
+  <h1>구간을 뽑고, 닮은 구간을 찾고, 확인한 뒤 보고서로</h1>
+  <p>계산은 전부 이 브라우저 안에서 끝납니다. 파일은 어디로도 올라가지 않습니다.</p>
+</div></header>
+<main><div class="wrap">
+<div class="card">
+  <h2 style="margin-top:0">1. 파일과 열 매핑</h2>
+  <p>CSV(UTF-8·EUC-KR) 또는 엑셀 첫 시트를 읽습니다. 한 파일이 한 번의 시험입니다.</p>
+  <p>위쪽 제목 줄은 건너뛰고, 머리글 아래 단위 줄도 알아서 읽습니다.
+  열 이름이 달라도 됩니다(차속·VehSpd, 부하율·EngLoad, 회전수·EngSpd, 수소유량·H2_Flow 등).
+  자동으로 고른 열은 「자동 추정」, 직접 고친 열은 「직접 지정」으로 표시합니다.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>채널</th><th>단위</th><th>쓰는 곳</th></tr></thead>
+    <tbody>
+      <tr><td>시간</td><td>s (ms·hh:mm:ss 도 읽음)</td><td>필수</td></tr>
+      <tr><td>차속</td><td>km/h</td><td>가속·감속 조건, 거리, 연비</td></tr>
+      <tr><td>페달 · 부하율 · 엔진회전수</td><td>% · % · rpm</td><td>평균 지표, 유사 구간 탐색, 유사성 판정</td></tr>
+      <tr><td>연료유량</td><td>kg/h · g/s · L/h</td><td>연료량, 연비</td></tr>
+    </tbody>
+  </table></div>
+</div>
+<div class="card">
+  <h2 style="margin-top:0">2. 구간 조건과 지표</h2>
+  <p>차속 구간(예: 0→30 km/h 가속, 30→0 감속) 또는 채널 조건 지속(예: 페달 60% 이상이 1초 이상)으로 구간을 뽑습니다.</p>
+  <p>0 km/h 출발은 「출발 판정」 차속(기본 0.5 km/h)을 지나는 순간을 시작으로 봅니다. 정지 중 잡음 때문에 0 을 '지나는' 순간이 없기 때문입니다.
+  목표 차속에 닿기 전에 다시 멈추면 그 시도는 버립니다.</p>
+  <p>평균은 시간 가중 평균입니다. 거리 = 차속 적분, 연료량 = 유량 적분, 연비 = 거리 ÷ 연료량입니다.
+  표의 「계산」 표시는 원본 측정값이 아니라 이 도구가 계산한 값이라는 뜻입니다.</p>
+</div>
+<div class="card">
+  <h2 style="margin-top:0">3. 유사 구간 찾기와 판정</h2>
+  <p>레퍼런스 구간의 페달·부하율·회전수를 0.1초 간격으로 다시 표본화한 뒤, 다른 파일 전체에 0.1초씩 밀어 대며 거리를 잽니다.
+  채널마다 레퍼런스 구간의 최소~최대로 정규화하므로, 부하율이 통째로 높아진 것도 차이로 드러납니다.
+  서로 절반 이상 겹치지 않는 후보 3개를 보여 줍니다.</p>
+  <p>판정 기준은 세 가지입니다. 값은 화면에서 바꿀 수 있습니다.</p>
+  <ul style="margin-left:20px">
+    <li>회전수 구간(기본 200 rpm)별 평균 부하율 차이의 최대가 허용(기본 ±5%p) 이내</li>
+    <li>비교 채널 상관계수 중 가장 낮은 값이 기준(기본 0.9) 이상</li>
+    <li>레퍼런스의 회전수 구간 중 비교 데이터에도 표본이 있는 비율(기본 80%) 이상</li>
+  </ul>
+  <p>자동 판정은 참고 값입니다. 그래프를 보고 「유사함」 또는 「유사하지 않음」을 직접 고르세요.
+  모든 비교를 확인해야 보고서를 만들 수 있고, 후보 창을 바꾸면 다시 확인합니다.
+  자동 판정과 다르게 고르면 보고서에 그 사실이 함께 적힙니다.</p>
+</div>
+<div class="card">
+  <h2 style="margin-top:0">4. 보고서</h2>
+  <p>보고서는 화면에 그려지고 「인쇄 · PDF 저장」으로 내보냅니다. 엑셀에는 구간지표 · 유사도판정 · 회전수구간_부하율 · 정렬 데이터 시트가 들어갑니다.</p>
+  <p>AI 소견 초안은 선택입니다. 판정 문장과 요약 수치만 보내고 원본 데이터는 보내지 않습니다. 결과는 「AI 초안 — 검토 필요」로 따로 표시합니다.</p>
+</div>
+<div class="card">
+  <h2 style="margin-top:0">5. 이번 판에서 하지 않는 것</h2>
+  <ul style="margin-left:20px">
+    <li>제어기 매뉴얼(수천 쪽 PDF) 기반 고장 진단·트러블슈팅(기획2) — 대용량 문서 검색(RAG)이 핵심이라 DAY4 실습에서 축소판으로 다룹니다.</li>
+    <li>속도가 다른 두 시험을 시간 축으로 늘이고 줄여 맞추기(DTW) — 이번 판은 같은 길이의 창끼리 비교합니다.</li>
+  </ul>
+  <p class="sub">예제 데이터는 실제 사내 데이터가 아닙니다(가짜 수소엔진 차량 가속 시험 3개).</p>
+</div>
+</div></main>
+<footer><div class="wrap">생성형 AI 업무자동화 전문가과정 2차수 · 프로젝트 05 · 기획 Hyunwoo Park</div></footer>
+</body>
+</html>

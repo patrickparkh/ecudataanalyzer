@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>시험 데이터 비교 보고서 — 구간 지표 · 유사 구간 · 유사성 판정</title>
+<!-- seo-kit: 검색 · 공유 미리보기(주소를 옮기면 이 묶음의 주소를 내 주소로) -->
+<link rel="canonical" href="https://build-2611-05.jobability.co.kr/">
+<meta name="robots" content="index,follow">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="HD건설기계">
+<meta property="og:title" content="HD건설기계 · ECU Data Analyzer">
+<meta property="og:description" content="Raw Data 분석 · 가속성, 부하율, 연비 계산 · 다중 데이터 구간의 유사도 분석 · 데이터 시각화 보고서 생성">
+<meta property="og:url" content="https://build-2611-05.jobability.co.kr/">
+<meta property="og:image" content="https://build-2611-05.jobability.co.kr/og-image.png?v=2">
+<meta property="og:image:secure_url" content="https://build-2611-05.jobability.co.kr/og-image.png?v=2">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="ECU Data Analyzer">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="HD건설기계 · ECU Data Analyzer">
+<meta name="twitter:description" content="Raw Data 분석 · 가속성, 부하율, 연비 계산 · 다중 데이터 구간의 유사도 분석 · 데이터 시각화 보고서 생성">
+<meta name="twitter:image" content="https://build-2611-05.jobability.co.kr/og-image.png?v=2">
+<!-- /seo-kit -->
+<meta name="description" content="Raw Data 분석 · 가속성, 부하율, 연비 계산 · 다중 데이터 구간의 유사도 분석 · 데이터 시각화 보고서 생성">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/app.css">
+<!-- auth-kit: 로그인 전에는 도구 화면을 감춘다(js/auth.js 가 판정 뒤 푼다) -->
+<script>document.documentElement.classList.add('auth-lock')</script>
+<link rel="stylesheet" href="css/auth.css?v=2026-11-13.12">
+<link rel="stylesheet" href="css/board.css?v=2026-11-13.12">
+<link rel="stylesheet" href="css/kit-build.css?v=2026-11-13.12">
+<!-- /auth-kit -->
+</head>
+<body>
+
+<nav class="topnav" aria-label="주요 메뉴">
+  <div class="topnav-inner">
+    <a class="topnav-brand" href="index.html">시험 데이터 비교 보고서 <small>build-2611-05 · 기획 Hyunwoo Park</small></a>
+    <ul class="topnav-links">
+      <li><a href="#s-data">데이터</a></li>
+      <li><a href="#s-seg">구간 지표</a></li>
+      <li><a href="#s-ref">유사 구간</a></li>
+      <li><a href="#s-report">보고서</a></li>
+      <li><a href="guide.html">사용법</a></li>
+      <li><a href="plan.html">기획서</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="hero"><div class="wrap">
+  <div class="eyebrow">생성형 AI 업무자동화 전문가과정 · 2차수 · 프로젝트 05</div>
+  <h1>시험 데이터 비교 보고서</h1>
+  <p>차량 시험 raw data를 올리면 <b>지정한 조건의 구간</b>(예: 차속 0→30 km/h 가속)을 뽑아 가속 시간·평균 부하율·연비를 한 번에 계산합니다.
+     레퍼런스 데이터를 하나 고르면 다른 데이터에서 <b>페달·부하율·회전수 패턴이 닮은 구간</b>을 찾아 정량 비교하고,
+     <b>유사 여부를 직접 확인한 뒤</b> 그래프가 들어간 보고서를 만듭니다.</p>
+</div></header>
+
+<main><div class="wrap">
+
+<section id="s-data" class="card">
+  <h2 style="margin-top:0">1. 시험 데이터를 올리세요</h2>
+  <p class="sub">CSV 또는 엑셀(.xlsx) 여러 개. 한 파일 = 한 번의 시험입니다. 열 이름이 달라도 아래 매핑 표에서 고를 수 있습니다.</p>
+  <label class="drop" id="drop">
+    <input type="file" id="file" accept=".csv,.txt,.xlsx,.xls" multiple>
+    <b>파일을 끌어다 놓거나 눌러서 고르세요(여러 개 가능)</b>
+    <span>파일은 서버로 올라가지 않습니다 · 브라우저 안에서만 계산합니다</span>
+  </label>
+  <div class="btnrow">
+    <button class="btn primary" id="btn-sample">예제로 해보기</button>
+    <button class="btn" id="btn-template">빈 양식(CSV) 내려받기</button>
+    <button class="btn" id="btn-sample-dl">예제 파일 내려받기</button>
+    <label class="inline">연료유량 단위
+      <select id="fuel-unit"><option value="kg/h">kg/h (수소)</option><option value="g/s">g/s → kg/h</option><option value="L/h">L/h</option></select></label>
+  </div>
+  <div id="files"></div>
+</section>
+
+<section id="s-seg" class="card" hidden>
+  <h2 style="margin-top:0">2. 구간 조건과 지표</h2>
+  <p class="sub">조건을 바꾸면 모든 파일에서 구간을 다시 뽑습니다. 구간 시작·끝은 샘플 사이를 직선 보간한 시각입니다.</p>
+  <div class="form">
+    <label>조건 종류
+      <select id="c-type"><option value="speed">차속 구간(가속·감속)</option><option value="cond">채널 조건 지속</option></select></label>
+    <label class="f-speed">시작 차속(km/h) <input type="number" id="c-from" value="0" step="1"></label>
+    <label class="f-speed">끝 차속(km/h) <input type="number" id="c-to" value="30" step="1"></label>
+    <label class="f-speed">출발 판정(km/h) <input type="number" id="c-eps" value="0.5" step="0.1" min="0"></label>
+    <label class="f-cond">채널 <select id="c-ch"><option value="pedal">페달</option><option value="load">부하율</option><option value="rpm">엔진회전수</option><option value="speed">차속</option></select></label>
+    <label class="f-cond">비교 <select id="c-op"><option>&gt;=</option><option>&lt;=</option><option>&gt;</option><option>&lt;</option></select></label>
+    <label class="f-cond">값 <input type="number" id="c-val" value="60"></label>
+    <label class="f-cond">최소 지속(초) <input type="number" id="c-min" value="1" step="0.5" min="0"></label>
+  </div>
+  <div id="seg-sum"></div>
+  <div class="tablewrap" id="seg-table"></div>
+  <h3>파일별 차속과 뽑힌 구간</h3>
+  <div class="ctrl"><label>파일 <select id="ov-file"></select></label></div>
+  <div id="overview" class="chart"></div>
+</section>
+
+<section id="s-ref" class="card" hidden>
+  <h2 style="margin-top:0">3. 레퍼런스와 닮은 구간 찾기</h2>
+  <p class="sub">레퍼런스 구간의 페달·부하율·회전수 모양을 다른 파일 전체에 0.1초씩 밀어 대며 가장 가까운 창을 찾습니다.
+     채널마다 레퍼런스 구간의 최소~최대로 정규화한 뒤 거리를 잽니다.</p>
+  <div class="form">
+    <label>레퍼런스 파일 <select id="r-file"></select></label>
+    <label>레퍼런스 구간 <select id="r-seg"></select></label>
+    <label>시작(s) <input type="number" id="r-t0" step="0.1"></label>
+    <label>끝(s) <input type="number" id="r-t1" step="0.1"></label>
+    <fieldset class="wide chans"><legend>비교 채널</legend>
+      <label class="chk"><input type="checkbox" value="pedal" checked> 페달</label>
+      <label class="chk"><input type="checkbox" value="load" checked> 부하율</label>
+      <label class="chk"><input type="checkbox" value="rpm" checked> 엔진회전수</label>
+      <label class="chk"><input type="checkbox" value="speed"> 차속</label>
+    </fieldset>
+    <label>부하율 허용 차이(±%p) <input type="number" id="o-tol" value="5" step="0.5" min="0"></label>
+    <label>상관계수 최소 <input type="number" id="o-r" value="0.9" step="0.01" min="0" max="1"></label>
+    <label>회전수 구간 겹침 최소 <input type="number" id="o-cov" value="0.8" step="0.05" min="0" max="1"></label>
+    <label>회전수 구간 폭(rpm) <input type="number" id="o-bin" value="200" step="50" min="50"></label>
+    <button class="btn primary" id="btn-search">유사 구간 찾기</button>
+  </div>
+  <div id="cmp"></div>
+</section>
+
+<section id="s-report" class="card" hidden>
+  <h2 style="margin-top:0">4. 보고서</h2>
+  <p class="sub noprint">모든 비교에서 「유사함」 또는 「유사하지 않음」을 고른 뒤에만 보고서를 만듭니다. 자동 판정은 참고 값입니다.</p>
+  <div id="gate" class="noprint"></div>
+  <div class="btnrow noprint">
+    <button class="btn primary" id="btn-report" disabled>보고서 만들기</button>
+    <button class="btn green" id="btn-xlsx" disabled>엑셀로 내보내기</button>
+    <button class="btn" id="btn-print" disabled>인쇄 · PDF 저장</button>
+  </div>
+  <details class="ai noprint">
+    <summary>AI 소견 초안(선택 · 키가 없어도 보고서는 만들어집니다)</summary>
+    <div class="form">
+      <label>제공자 <select id="ai-prov"><option value="anthropic">Anthropic (claude-haiku-5-5)</option><option value="openai">OpenAI (gpt-4o-mini)</option></select></label>
+      <label class="wide">API 키 <input type="password" id="ai-key" autocomplete="off" placeholder="키는 이 브라우저에만 저장됩니다"></label>
+      <button class="btn" id="btn-ai" disabled>AI 소견 초안 받기</button>
+    </div>
+    <p class="sub">보내는 내용은 판정 문장과 요약 수치뿐입니다. 원본 시험 데이터는 보내지 않습니다. 키는 이 브라우저(localStorage)에만 저장됩니다.</p>
+  </details>
+  <div id="report"></div>
+</section>
+
+</div></main>
+
+<footer><div class="wrap">
+  생성형 AI 업무자동화 전문가과정 2차수 · 프로젝트 05 · 기획 Hyunwoo Park ·
+  예제 데이터는 실제 사내 데이터가 아닙니다.
+</div></footer>
+
+<script src="lib/xlsx.full.min.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/app.js"></script>
+<!-- auth-kit: 로그인 · 사용 신청 · 승인 · 게시판(키트 정본 data10-00/kit/auth, 적용 build-2611-00/tools/kit) -->
+<script src="vendor/supabase.js?v=2026-11-13.12"></script>
+<script src="js/auth-config.js?v=2026-11-13.12"></script>
+<script src="js/kit-build.js?v=2026-11-13.12"></script>
+<script src="js/board.js?v=2026-11-13.12"></script>
+<script src="js/auth.js?v=2026-11-13.12"></script>
+<!-- /auth-kit -->
+</body>
+</html>
