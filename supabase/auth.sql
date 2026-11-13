@@ -175,7 +175,7 @@ grant execute on function public.build261105_is_admin(), public.build261105_is_m
 -- 내 프로젝트로 옮길 때는 목록을 내 이메일로 바꾸거나 비워 두고 화면의 「첫 관리자 되기」를 씁니다.
 do $$
 declare
-  v_emails text[] := array['aebon@kakao.com']::text[];
+  v_emails text[] := array[]::text[];
   v_email text; v_uid uuid; v_status text; v_roles text[];
 begin
   foreach v_email in array coalesce(v_emails, '{}') loop

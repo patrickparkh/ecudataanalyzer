@@ -1,11 +1,11 @@
-// 로그인 설정 — 이 파일 한 곳만 바꾸면 된다(생성: build-2611-00/tools/kit/apply-kit.mjs, 대문 문구 출처 docs/plan.json).
-// 내 Supabase 로 옮길 때: url · anonKey 를 내 프로젝트 값으로, 카카오를 설정하지 않았으면 kakao: false. 안내 = docs/내_깃허브로_옮기기.md
-// prefix 는 supabase/auth.sql 의 표 이름 앞부분과 같아야 한다.
+// 로그인 설정 — 내 Supabase 프로젝트 값으로 맞춘 판입니다(카카오 로그인 없음 · 이메일 가입).
+// url · anonKey 는 공개해도 되는 값입니다(표마다 RLS 로 막혀 있습니다). secret · service_role 키는 절대 넣지 마세요.
+// prefix 는 supabase/auth.sql 의 표 이름 앞부분과 같아야 합니다.
 window.AUTH_CONFIG = {
-  "url": "https://hcmgdztsgjvzcyxyayaj.supabase.co",
-  "anonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhjbWdkenRzZ2p2emN5eHlheWFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0MzU4ODcsImV4cCI6MjA4NzAxMTg4N30.gznaPzY1l8qDAPsEyYNR9KS7f7VqS3xaw-_2HTSwSZw",
+  "url": "https://isrnmgecqysooyvctyod.supabase.co",
+  "anonKey": "sb_publishable_q9pIIhgxj3laqpe2TGhbLw_7wZHPr42",
   "prefix": "build261105",
-  "kakao": true,
+  "kakao": false,
   "idleMinutes": 30,
   "localBypass": true,
   "board": true,
